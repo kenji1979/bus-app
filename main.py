@@ -25,7 +25,7 @@ BASE_API_URL = "https://itamicity-bus.bus-navigation.jp/wgsys/wgss/busMarkImg.ht
 def get_bus():
     try:
         # --------------------------------------------------
-        # 【キャッシュ対策】現在時刻（ミリ秒）を取得してURLに付与する
+        # 【キャッシュ対策】現在時刻（ミリ秒）を取得してURLに付与する 
         # --------------------------------------------------
         current_timestamp = int(time.time() * 1000)
         request_url = f"{BASE_API_URL}&_={current_timestamp}"
