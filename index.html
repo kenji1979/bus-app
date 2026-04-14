@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>バス到着案内</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <div id="bus-content">
-      <p class="message">読み込み中...</p>
+  <div class="page">
+    <header class="page-header">
+      <h1 class="page-title">伊丹市バス 到着案内</h1>
+    </header>
+    <div id="bus-list" class="bus-list" aria-live="polite">
+      <p class="message global-loading">読み込み中...</p>
     </div>
   </div>
-  <script src="app.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>
