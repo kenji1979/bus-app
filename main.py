@@ -204,7 +204,28 @@ def read_index():
     return FileResponse(BASE_DIR / "index.html")
 
 
-# CSS/JS 等は /static/ 以下で配信（/bus API より後にマウント）
+@app.get("/manifest.json")
+def read_manifest():
+    """PWA 用 Web App Manifest（ホーム画面追加・アドレスバー色など）"""
+    return FileResponse(
+        BASE_DIR / "manifest.json",
+        media_type="application/manifest+json",
+    )
+
+
+@app.get("/sw.js")
+def read_service_worker():
+    """
+    Service Worker をサイト直下で配信（scope '/' で登録可能にする）。
+    /static/sw.js だとスコープが /static に限定されるためルート用ルートを用意。
+    """
+    return FileResponse(
+        BASE_DIR / "sw.js",
+        media_type="application/javascript",
+    )
+
+
+# CSS/JS / アイコン画像などは /static/ 以下で配信（/bus API より後にマウント）
 app.mount(
     "/static",
     StaticFiles(directory=str(BASE_DIR)),
