@@ -1,6 +1,6 @@
 const CONFIG = {
   useMock: false,
-  apiUrl: "/bus",
+  apiUrl: "/bus", 
   pollIntervalMs: 30000,
 };
 
