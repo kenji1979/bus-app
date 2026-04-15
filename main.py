@@ -94,5 +94,13 @@ def get_bus():
         results = list(pool.map(_fetch_segment_buses, BUS_SEGMENTS))
     return results
 
-# 静的ファイルの配信設定（重要：APIより後に書く）
-app.mount("/", StaticFiles(directory=str(BASE_DIR), html=True), name="static")
+# --- main.py の一番最後をこのように修正 ---
+
+@app.get("/")
+def read_index():
+    # 明示的に index.html を返す
+    return FileResponse(BASE_DIR / "index.html")
+
+# 下記の3行を「一番最後」に追加してください
+# html=False にし、個別のファイル(app.js等)をルート直下で見えるようにします
+app.mount("/", StaticFiles(directory=str(BASE_DIR)), name="static")
