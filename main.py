@@ -102,10 +102,21 @@ def get_bus():
 def read_index():
     return FileResponse(BASE_DIR / "index.html")
 
-# 個別のファイルを直接ルートで配信するための設定（ここを修正しました）
 @app.get("/{file_path:path}")
 def read_static(file_path: str):
+    # 1. まずそのまま探す
     file_full_path = BASE_DIR / file_path
     if file_full_path.is_file():
         return FileResponse(file_full_path)
-    return {"detail": "Not Found"}
+    
+    # 2. もし見つからなければ、ファイル名の先頭を大文字にして探す (app.js -> App.js)
+    alt_path = BASE_DIR / file_path.capitalize()
+    if alt_path.is_file():
+        return FileResponse(alt_path)
+    
+    # 3. それでもダメなら小文字にして探す (App.js -> app.js)
+    alt_path_low = BASE_DIR / file_path.lower()
+    if alt_path_low.is_file():
+        return FileResponse(alt_path_low)
+
+    return {"detail": f"File {file_path} not found"}
