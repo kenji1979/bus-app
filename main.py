@@ -225,9 +225,5 @@ def read_service_worker():
     )
 
 
-# CSS/JS / アイコン画像などは /static/ 以下で配信（/bus API より後にマウント）
-app.mount(
-    "/static",
-    StaticFiles(directory=str(BASE_DIR)),
-    name="static",
-)
+# フォルダ内のファイルを "/static" という名前ではなく、直接読み込めるようにします
+app.mount("/", StaticFiles(directory=str(BASE_DIR), html=True), name="static")
