@@ -96,11 +96,16 @@ def get_bus():
 
 # --- main.py の一番最後をこのように修正 ---
 
+# --- main.py の一番最後をこの 7行 に差し替え ---
+
 @app.get("/")
 def read_index():
-    # 明示的に index.html を返す
     return FileResponse(BASE_DIR / "index.html")
 
-# 下記の3行を「一番最後」に追加してください
-# html=False にし、個別のファイル(app.js等)をルート直下で見えるようにします
-app.mount("/", StaticFiles(directory=str(BASE_DIR)), name="static")
+# 個別のファイルを直接ルートで配信するための設定（ここを修正しました）
+@app.get("/{file_path:path}")
+def read_static(file_path: str):
+    file_full_path = BASE_DIR / file_path
+    if file_full_path.is_file():
+        return FileResponse(file_full_path)
+    return {"detail": "Not Found"}
