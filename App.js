@@ -1,86 +1,51 @@
 const CONFIG = {
   useMock: false,
-  apiUrl: "/bus", 
-  pollIntervalMs: 30000,
+  apiUrl: "/bus",
+  pollIntervalMs: 30000, // 30秒更新
 };
 
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function buildCardHtml(item) {
-  const route = item.route != null ? String(item.route) : "未定";
-  const heading = item.heading != null ? String(item.heading) : String(item.to || "");
-  const fromStop = item.from_stop != null ? String(item.from_stop) : "";
-  const delay = Number(item.delay) || 0;
-  const eta = item.eta;
-
-  const routeLine = `${escapeHtml(route)}（${escapeHtml(heading)}行き）`;
-
-  if (eta == null || eta === "") {
-    return `
-      <article class="bus-card bus-card--empty">
-        <p class="bus-card__route">${routeLine}</p>
-        <p class="bus-card__empty-msg">現在、到着予定のバスはありません</p>
-      </article>
-    `;
-  }
-
-  const delayHtml =
-    delay > 0
-      ? `<p class="bus-card__delay">（${escapeHtml(delay)}分遅れ）</p>`
-      : "";
-
-  return `
-    <article class="bus-card">
-      <p class="bus-card__route">${routeLine}</p>
-      <p class="bus-card__eta">
-        <span class="bus-card__from-label">${escapeHtml(fromStop)}まで</span>
-        あと<span class="bus-card__eta-num">${escapeHtml(eta)}</span>分で到着
-      </p>
-      ${delayHtml}
-    </article>
-  `;
-}
-
 async function fetchBusData() {
-  const listEl = document.getElementById("bus-list");
-
+  const contentDiv = document.getElementById("bus-content");
+  
   try {
+    // GETリクエストでAPIを叩く
     const response = await fetch(CONFIG.apiUrl);
+    
     if (!response.ok) {
       throw new Error("APIレスポンスエラー");
     }
+    
     const data = await response.json();
 
-    if (!Array.isArray(data)) {
-      listEl.innerHTML = `<p class="error">データ形式が不正です</p>`;
-      return;
-    }
-
+    // バスがない場合
     if (data.length === 0) {
-      listEl.innerHTML = `<p class="message">現在、到着予定のバスはありません</p>`;
+      contentDiv.innerHTML = `<p class="message">現在、到着予定のバスはありません</p>`;
       return;
     }
 
-    listEl.innerHTML = data.map(buildCardHtml).join("");
+    // データがある場合（1件のみ取得）
+    const bus = data[0];
+    
+    // 遅延がある場合のみ遅延表示のHTMLを作成
+    const delayHtml = bus.delay > 0 
+      ? `<p class="delay">（${bus.delay}分遅れ）</p>` 
+      : "";
+
+    // 画面の書き換え
+    contentDiv.innerHTML = `
+      <p class="route">${bus.route}（${bus.to}行き）</p>
+      <p class="eta">あと<span class="eta-time">${bus.eta}</span>分で到着</p>
+      ${delayHtml}
+    `;
+
   } catch (error) {
     console.error("データ取得エラー:", error);
-    listEl.innerHTML = `<p class="error">データ取得に失敗しました</p>`;
+    contentDiv.innerHTML = `<p class="error">データ取得に失敗しました</p>`;
   }
 }
 
+// 画面表示時に最初の1回を実行
 fetchBusData();
-setInterval(fetchBusData, CONFIG.pollIntervalMs);
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js", { scope: "/" })
-      .catch((err) => console.warn("Service Worker の登録に失敗:", err));
-  });
-}
+// 30秒ごとに自動更新
+setInterval(fetchBusData, CONFIG.pollIntervalMs);
