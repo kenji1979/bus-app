@@ -225,5 +225,8 @@ def read_service_worker():
     )
 
 
-# フォルダ内のファイルを "/static" という名前ではなく、直接読み込めるようにします
+# index.html や app.js を直接配信するための設定
+# これにより https://.../app.js で直接ファイルにアクセスできるようになります
+from fastapi.staticfiles import StaticFiles
+
 app.mount("/", StaticFiles(directory=str(BASE_DIR), html=True), name="static")
